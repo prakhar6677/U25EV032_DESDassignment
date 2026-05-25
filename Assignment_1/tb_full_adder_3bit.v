@@ -1,34 +1,63 @@
-module tb_adder_3bit_structural;
+// tb_full_adder_3bit.v — Testbench (simulation only)
 
-  reg  [2:0] a, b;
-  reg  cin;
-  wire [2:0] sum;
-  wire cout;
+`timescale 1ns / 1ps
 
-  // Instantiate the design
-  adder_3bit_structural uut (
-    .a(a),
-    .b(b),
-    .cin(cin),
-    .sum(sum),
-    .cout(cout)
-  );
+module tb_full_adder_3bit;
 
-  // Required for EPWave
-  initial begin
-    $dumpfile("output.vcd");
-    $dumpvars;
-  end
+    // Stimulus signals
+    reg  [2:0] a, b;
+    reg        cin;
 
-  // Test cases
-  initial begin
-    a = 3'b000; b = 3'b000; cin = 0; #10;  // 0+0+0 = 0
-    a = 3'b001; b = 3'b001; cin = 0; #10;  // 1+1   = 2
-    a = 3'b011; b = 3'b010; cin = 0; #10;  // 3+2   = 5
-    a = 3'b101; b = 3'b010; cin = 1; #10;  // 5+2+1 = 8
-    a = 3'b111; b = 3'b001; cin = 0; #10;  // 7+1   = 8
-    a = 3'b111; b = 3'b111; cin = 1; #10;  // 7+7+1 = 15
-    $finish;
-  end
+    // Observation wires
+    wire [2:0] sum;
+    wire       cout;
+
+    // Instantiate the 3-bit full adder
+    full_adder_3bit uut (
+        .a   (a),
+        .b   (b),
+        .cin (cin),
+        .sum (sum),
+        .cout(cout)
+    );
+
+    // Task: display one result row with decimal values
+    task show_result;
+        begin
+            $display("  %b (%0d) | %b (%0d) | %b | %b (%0d) |  %b  | %s",
+                     a, a, b, b, cin,
+                     sum, sum, cout,
+                     ({cout,sum} == (a + b + cin)) ?
+                     "PASS" : "FAIL");
+        end
+    endtask
+
+    integer i, j;   // loop variables
+
+    initial begin
+        $display("======================================================");
+        $display("         3-Bit Full Adder — Structural Model          ");
+        $display("======================================================");
+        $display("  A (dec) | B (dec) | Cin | Sum (dec) | Cout | Check");
+        $display("---------|---------|-----|-----------|------|-------");
+
+        // Test all combinations using nested loop
+        for (i = 0; i < 8; i = i + 1) begin
+            for (j = 0; j < 8; j = j + 1) begin
+
+                // Test with cin = 0
+                a = i; b = j; cin = 0; #10;
+                show_result;
+
+                // Test with cin = 1
+                a = i; b = j; cin = 1; #10;
+                show_result;
+
+            end
+        end
+
+        $display("======================================================");
+        $finish;
+    end
 
 endmodule
