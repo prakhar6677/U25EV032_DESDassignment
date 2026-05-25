@@ -1,31 +1,66 @@
-module tb_adder_3bit_dataflow;
+// tb_full_adder_3bit_df.v — Testbench (simulation only)
 
-  reg  [2:0] a, b;
-  reg  cin;
-  wire [2:0] sum;
-  wire cout;
+`timescale 1ns / 1ps
 
-  adder_3bit_dataflow uut (
-    .a(a),
-    .b(b),
-    .cin(cin),
-    .sum(sum),
-    .cout(cout)
-  );
+module tb_full_adder_3bit_df;
 
-  initial begin
-    $dumpfile("output.vcd");
-    $dumpvars;
-  end
+    // Stimulus signals
+    reg  [2:0] a, b;
+    reg        cin;
 
-  initial begin
-    a = 3'b000; b = 3'b000; cin = 0; #10;  // 0+0+0 = 0
-    a = 3'b001; b = 3'b001; cin = 0; #10;  // 1+1   = 2
-    a = 3'b011; b = 3'b010; cin = 0; #10;  // 3+2   = 5
-    a = 3'b101; b = 3'b010; cin = 1; #10;  // 5+2+1 = 8
-    a = 3'b111; b = 3'b001; cin = 0; #10;  // 7+1   = 8
-    a = 3'b111; b = 3'b111; cin = 1; #10;  // 7+7+1 = 15
-    $finish;
-  end
+    // Observation wires
+    wire [2:0] sum;
+    wire       cout;
+
+    // Instantiate the dataflow 3-bit adder
+    full_adder_3bit_df uut (
+        .a   (a),
+        .b   (b),
+        .cin (cin),
+        .sum (sum),
+        .cout(cout)
+    );
+
+    // Wire to hold expected result for self-checking
+    wire [3:0] expected;
+    assign expected = a + b + cin;   // 4-bit result to capture cout
+
+    // Task: print one result row with PASS/FAIL check
+    task show_result;
+        begin
+            $display(
+                "  %b(%0d) + %b(%0d) + %b = %b%b(%0d) | Exp:%b(%0d) | %s",
+                a, a,
+                b, b,
+                cin,
+                cout, sum, {cout,sum},
+                expected, expected,
+                ({cout,sum} == expected) ? "PASS" : "FAIL"
+            );
+        end
+    endtask
+
+    integer i, j;
+
+    initial begin
+        $display("============================================================");
+        $display("        3-Bit Full Adder — Dataflow Modeling                ");
+        $display("============================================================");
+        $display("  A(dec) + B(dec) + Cin = Cout|Sum(dec) | Expected | Check ");
+        $display("------------------------------------------------------------");
+
+        // Exhaustive test — all 8x8x2 = 128 combinations
+        for (i = 0; i < 8; i = i + 1) begin
+            for (j = 0; j < 8; j = j + 1) begin
+                a = i; b = j; cin = 0; #10;
+                show_result;
+                a = i; b = j; cin = 1; #10;
+                show_result;
+            end
+        end
+
+        $display("============================================================");
+        $finish;
+    end
 
 endmodule
