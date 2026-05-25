@@ -1,35 +1,65 @@
-module tb_comparator_procedural;
+// tb_comparator_2bit_proc.v — Testbench (simulation only)
 
-reg [1:0] A, B;
-wire A_greater, A_equal, A_less;
+`timescale 1ns / 1ps
 
-comparator_procedural uut (
-    .A(A),
-    .B(B),
-    .A_greater(A_greater),
-    .A_equal(A_equal),
-    .A_less(A_less)
-);
+module tb_comparator_2bit_proc;
 
-initial begin
+    // Stimulus signals
+    reg  [1:0] a, b;
 
-    $dumpfile("comparator_procedural.vcd");
-    $dumpvars;
+    // Observation wires
+    wire gt, eq, lt;
 
-    A = 2'b00; B = 2'b00;
-    #10;
+    // Instantiate the procedural comparator
+    comparator_2bit_proc uut (
+        .a(a),
+        .b(b),
+        .gt(gt),
+        .eq(eq),
+        .lt(lt)
+    );
 
-    A = 2'b01; B = 2'b00;
-    #10;
+    // Task to display one row of results
+    task show_result;
+        begin
+            $display("  %b%b (%0d) | %b%b (%0d) |   %b   |   %b   |   %b  ",
+                     a[1], a[0], a,
+                     b[1], b[0], b,
+                     gt, eq, lt);
+        end
+    endtask
 
-    A = 2'b10; B = 2'b11;
-    #10;
+    initial begin
+        $display("==============================================");
+        $display("   2-Bit Comparator — Procedural Modeling     ");
+        $display("==============================================");
+        $display("   A (dec) |  B (dec) |  GT  |  EQ  |  LT  ");
+        $display("-----------|----------|------|------|------");
 
-    A = 2'b11; B = 2'b01;
-    #10;
+        // All 16 combinations
+        a = 2'b00; b = 2'b00; #10; show_result;
+        a = 2'b00; b = 2'b01; #10; show_result;
+        a = 2'b00; b = 2'b10; #10; show_result;
+        a = 2'b00; b = 2'b11; #10; show_result;
 
-    $finish;
+        a = 2'b01; b = 2'b00; #10; show_result;
+        a = 2'b01; b = 2'b01; #10; show_result;
+        a = 2'b01; b = 2'b10; #10; show_result;
+        a = 2'b01; b = 2'b11; #10; show_result;
 
-end
+        a = 2'b10; b = 2'b00; #10; show_result;
+        a = 2'b10; b = 2'b01; #10; show_result;
+        a = 2'b10; b = 2'b10; #10; show_result;
+        a = 2'b10; b = 2'b11; #10; show_result;
+
+        a = 2'b11; b = 2'b00; #10; show_result;
+        a = 2'b11; b = 2'b01; #10; show_result;
+        a = 2'b11; b = 2'b10; #10; show_result;
+        a = 2'b11; b = 2'b11; #10; show_result;
+
+        $display("==============================================");
+        $finish;
+    end
 
 endmodule
+
