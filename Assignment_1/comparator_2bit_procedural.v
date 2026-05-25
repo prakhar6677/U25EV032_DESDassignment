@@ -1,31 +1,32 @@
-module comparator_procedural(
-    input [1:0] A,
-    input [1:0] B,
-    output reg A_greater,
-    output reg A_equal,
-    output reg A_less
+// comparator_2bit_proc.v — Design file (Procedural Statements)
+
+module comparator_2bit_proc (
+    input  wire [1:0] a,     // 2-bit input A
+    input  wire [1:0] b,     // 2-bit input B
+    output reg        gt,    // 1 when A > B
+    output reg        eq,    // 1 when A = B
+    output reg        lt     // 1 when A < B
 );
 
-always @(*) begin
+    // always block triggers whenever a or b changes
+    always @(a or b) begin
 
-    if (A > B) begin
-        A_greater = 1;
-        A_equal = 0;
-        A_less = 0;
+        // Default all outputs to 0 first
+        gt = 0;
+        eq = 0;
+        lt = 0;
+
+        // Procedural if-else decision chain
+        if (a > b) begin
+            gt = 1;
+        end
+        else if (a == b) begin
+            eq = 1;
+        end
+        else begin
+            lt = 1;
+        end
+
     end
-
-    else if (A == B) begin
-        A_greater = 0;
-        A_equal = 1;
-        A_less = 0;
-    end
-
-    else begin
-        A_greater = 0;
-        A_equal = 0;
-        A_less = 1;
-    end
-
-end
 
 endmodule
