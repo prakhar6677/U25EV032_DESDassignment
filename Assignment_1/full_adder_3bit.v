@@ -1,33 +1,26 @@
-// 1-bit Full Adder using gate primitives (Gate-Level)
-module full_adder (
-  input  a, b, cin,
-  output sum, cout
+// full_adder_1bit.v — 1-bit Full Adder (building block)
+
+module full_adder_1bit (
+    input  wire a,      // 1-bit input A
+    input  wire b,      // 1-bit input B
+    input  wire cin,    // Carry in
+    output wire sum,    // Sum output
+    output wire cout    // Carry out
 );
 
-  wire n1, n2, n3;
+    // Internal wires for intermediate gate results
+    wire xor1_out;   // result of first XOR
+    wire and1_out;   // result of first AND
+    wire and2_out;   // result of second AND
 
-  xor g1 (n1,   a,   b  );   // n1  = a XOR b
-  xor g2 (sum,  n1,  cin);   // sum = n1 XOR cin
+    // Gate-level structural connections
+    // sum = a XOR b XOR cin
+    xor G1 (xor1_out, a, b);
+    xor G2 (sum,      xor1_out, cin);
 
-  and g3 (n2,   a,   b  );   // n2  = a AND b
-  and g4 (n3,   n1,  cin);   // n3  = n1 AND cin
-  or  g5 (cout, n2,  n3 );   // cout = n2 OR n3
-
-endmodule
-
-
-// 3-bit Adder: connects 3 full_adder modules (Structural)
-module adder_3bit_structural (
-  input  [2:0] a, b,
-  input  cin,
-  output [2:0] sum,
-  output cout
-);
-
-  wire c1, c2;   // carry wires between stages
-
-  full_adder fa0 (.a(a[0]), .b(b[0]), .cin(cin), .sum(sum[0]), .cout(c1)  );
-  full_adder fa1 (.a(a[1]), .b(b[1]), .cin(c1),  .sum(sum[1]), .cout(c2)  );
-  full_adder fa2 (.a(a[2]), .b(b[2]), .cin(c2),  .sum(sum[2]), .cout(cout));
+    // cout = (a AND b) OR (cin AND (a XOR b))
+    and G3 (and1_out, a, b);
+    and G4 (and2_out, cin, xor1_out);
+    or  G5 (cout,     and1_out, and2_out);
 
 endmodule
