@@ -1,35 +1,82 @@
-module tb_comparator_dataflow;
+// tb_comparator_2bit.v — Testbench (simulation only)
 
-reg [1:0] A, B;
-wire A_greater, A_equal, A_less;
+`timescale 1ns / 1ps
 
-comparator_dataflow uut (
-    .A(A),
-    .B(B),
-    .A_greater(A_greater),
-    .A_equal(A_equal),
-    .A_less(A_less)
-);
+module tb_comparator_2bit;
 
-initial begin
+    // Stimulus signals — reg because we assign in initial block
+    reg  [1:0] a, b;
 
-    $dumpfile("comparator_dataflow.vcd");
-    $dumpvars;
+    // Observation wires — driven by DUT outputs
+    wire gt, eq, lt;
 
-    A = 2'b00; B = 2'b00;
-    #10;
+    // Instantiate the design under test
+    comparator_2bit uut (
+        .a(a),
+        .b(b),
+        .gt(gt),
+        .eq(eq),
+        .lt(lt)
+    );
 
-    A = 2'b01; B = 2'b00;
-    #10;
+    initial begin
+        $display("==========================================");
+        $display("        2-Bit Comparator Truth Table      ");
+        $display("==========================================");
+        $display("  A  |  B  |  GT  |  EQ  |  LT  ");
+        $display("-----|-----|------|------|------");
 
-    A = 2'b10; B = 2'b11;
-    #10;
+        // Test all 16 combinations (4 values of A x 4 values of B)
+        a = 2'b00; b = 2'b00; #10;
+        $display("  %b  |  %b  |   %b  |   %b  |   %b", a, b, gt, eq, lt);
 
-    A = 2'b11; B = 2'b01;
-    #10;
+        a = 2'b00; b = 2'b01; #10;
+        $display("  %b  |  %b  |   %b  |   %b  |   %b", a, b, gt, eq, lt);
 
-    $finish;
+        a = 2'b00; b = 2'b10; #10;
+        $display("  %b  |  %b  |   %b  |   %b  |   %b", a, b, gt, eq, lt);
 
-end
+        a = 2'b00; b = 2'b11; #10;
+        $display("  %b  |  %b  |   %b  |   %b  |   %b", a, b, gt, eq, lt);
+
+        a = 2'b01; b = 2'b00; #10;
+        $display("  %b  |  %b  |   %b  |   %b  |   %b", a, b, gt, eq, lt);
+
+        a = 2'b01; b = 2'b01; #10;
+        $display("  %b  |  %b  |   %b  |   %b  |   %b", a, b, gt, eq, lt);
+
+        a = 2'b01; b = 2'b10; #10;
+        $display("  %b  |  %b  |   %b  |   %b  |   %b", a, b, gt, eq, lt);
+
+        a = 2'b01; b = 2'b11; #10;
+        $display("  %b  |  %b  |   %b  |   %b  |   %b", a, b, gt, eq, lt);
+
+        a = 2'b10; b = 2'b00; #10;
+        $display("  %b  |  %b  |   %b  |   %b  |   %b", a, b, gt, eq, lt);
+
+        a = 2'b10; b = 2'b01; #10;
+        $display("  %b  |  %b  |   %b  |   %b  |   %b", a, b, gt, eq, lt);
+
+        a = 2'b10; b = 2'b10; #10;
+        $display("  %b  |  %b  |   %b  |   %b  |   %b", a, b, gt, eq, lt);
+
+        a = 2'b10; b = 2'b11; #10;
+        $display("  %b  |  %b  |   %b  |   %b  |   %b", a, b, gt, eq, lt);
+
+        a = 2'b11; b = 2'b00; #10;
+        $display("  %b  |  %b  |   %b  |   %b  |   %b", a, b, gt, eq, lt);
+
+        a = 2'b11; b = 2'b01; #10;
+        $display("  %b  |  %b  |   %b  |   %b  |   %b", a, b, gt, eq, lt);
+
+        a = 2'b11; b = 2'b10; #10;
+        $display("  %b  |  %b  |   %b  |   %b  |   %b", a, b, gt, eq, lt);
+
+        a = 2'b11; b = 2'b11; #10;
+        $display("  %b  |  %b  |   %b  |   %b  |   %b", a, b, gt, eq, lt);
+
+        $display("==========================================");
+        $finish;
+    end
 
 endmodule
