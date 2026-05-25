@@ -1,33 +1,43 @@
-module tb_xor_nand;
+// tb_xor_structural.v — Testbench (simulation only)
 
-reg a, b;
-wire y;
+`timescale 1ns / 1ps
 
-xor_nand uut (
-    .a(a),
-    .b(b),
-    .y(y)
-);
+module tb_xor_structural;
 
-initial begin
+    // Declare stimulus signals and observation wire
+    reg  a, b;     // We drive these, so reg
+    wire y;        // Driven by DUT, so wire
 
-    $dumpfile("xor_nand.vcd");
-    $dumpvars(0, tb_xor_nand);
+    // Instantiate the structural XOR design
+    xor_structural uut (
+        .a(a),
+        .b(b),
+        .y(y)
+    );
 
-    a = 0; b = 0;
-    #10;
+    initial begin
+        // Print header
+        $display("===========================");
+        $display("  XOR via NAND (Structural)");
+        $display("===========================");
+        $display("  A | B | Y (XOR)");
+        $display("  --|---|--------");
 
-    a = 0; b = 1;
-    #10;
+        // Apply all 4 input combinations with 10ns gap each
+        a = 0; b = 0; #10;
+        $display("  %b | %b |   %b", a, b, y);
 
-    a = 1; b = 0;
-    #10;
+        a = 0; b = 1; #10;
+        $display("  %b | %b |   %b", a, b, y);
 
-    a = 1; b = 1;
-    #10;
+        a = 1; b = 0; #10;
+        $display("  %b | %b |   %b", a, b, y);
 
-    $finish;
+        a = 1; b = 1; #10;
+        $display("  %b | %b |   %b", a, b, y);
 
-end
+        $display("===========================");
+        $finish;
+    end
 
 endmodule
