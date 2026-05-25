@@ -1,31 +1,39 @@
-module tb_xor_behavioral;
+// tb_xor_gate.v — Testbench file (simulation only, NOT synthesizable)
 
-reg a, b;
-wire y;
+`timescale 1ns / 1ps   // Time unit = 1ns, precision = 1ps
 
-xor_behavioral uut (
-    .a(a),
-    .b(b),
-    .y(y)
-);
+module tb_xor_gate;    // Testbench has NO ports — it's self-contained
 
-initial begin
-    $dumpfile("xor_behavioral.vcd");
-    $dumpvars(0, tb_xor_behavioral);
+    // Declare signals to drive inputs and observe outputs
+    reg  a, b;         // reg because we drive them from an initial block
+    wire y;            // wire because it's driven by the design module
 
-    a = 0; b = 0;
-    #10;
+    // Instantiate (connect) the design under test (DUT)
+    xor_gate uut (
+        .a(a),
+        .b(b),
+        .y(y)
+    );
 
-    a = 0; b = 1;
-    #10;
+    // Initial block: runs once at simulation start (not synthesizable)
+    initial begin
+        $display("a | b | y (XOR)");
+        $display("--|---|-------");
 
-    a = 1; b = 0;
-    #10;
+        // Test all 4 combinations of 1-bit inputs
+        a = 0; b = 0; #10;
+        $display("%b | %b |   %b", a, b, y);
 
-    a = 1; b = 1;
-    #10;
+        a = 0; b = 1; #10;
+        $display("%b | %b |   %b", a, b, y);
 
-    $finish;
-end
+        a = 1; b = 0; #10;
+        $display("%b | %b |   %b", a, b, y);
+
+        a = 1; b = 1; #10;
+        $display("%b | %b |   %b", a, b, y);
+
+        $finish;   // End simulation
+    end
 
 endmodule
