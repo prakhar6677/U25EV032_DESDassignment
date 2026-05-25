@@ -1,14 +1,25 @@
-module xor_nand(
-    input a,
-    input b,
-    output y
+// xor_structural.v — Design file (Structural Modeling)
+
+module xor_structural (
+    input  wire a,    // First input
+    input  wire b,    // Second input
+    output wire y     // XOR output
 );
 
-wire n1, n2, n3;
+    // Internal wires to carry signals between gates
+    wire w1, w2, w3;
 
-nand(n1, a, b);
-nand(n2, a, n1);
-nand(n3, b, n1);
-nand(y, n2, n3);
+    // Structural modeling: instantiate gates and connect with wires
+    // G1: w1 = a NAND b
+    nand G1 (w1, a, b);
+
+    // G2: w2 = a NAND w1
+    nand G2 (w2, a, w1);
+
+    // G3: w3 = b NAND w1
+    nand G3 (w3, b, w1);
+
+    // G4: y = w2 NAND w3  (final output)
+    nand G4 (y, w2, w3);
 
 endmodule
