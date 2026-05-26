@@ -1,31 +1,85 @@
-module tb_adder_3bit_behavioral;
+// tb_full_adder_3bit_beh.v — Testbench (simulation only)
 
-  reg  [2:0] a, b;
-  reg  cin;
-  wire [2:0] sum;
-  wire cout;
+`timescale 1ns / 1ps
 
-  adder_3bit_behavioral uut (
-    .a(a),
-    .b(b),
-    .cin(cin),
-    .sum(sum),
-    .cout(cout)
-  );
+module tb_full_adder_3bit_beh;
 
-  initial begin
-    $dumpfile("output.vcd");
-    $dumpvars;
-  end
+    // Stimulus signals
+    reg  [2:0] a, b;
+    reg        cin;
 
-  initial begin
-    a = 3'b000; b = 3'b000; cin = 0; #10;  // 0+0+0 = 0
-    a = 3'b001; b = 3'b001; cin = 0; #10;  // 1+1   = 2
-    a = 3'b011; b = 3'b010; cin = 0; #10;  // 3+2   = 5
-    a = 3'b101; b = 3'b010; cin = 1; #10;  // 5+2+1 = 8
-    a = 3'b111; b = 3'b001; cin = 0; #10;  // 7+1   = 8
-    a = 3'b111; b = 3'b111; cin = 1; #10;  // 7+7+1 = 15
-    $finish;
-  end
+    // Observation wires
+    wire [2:0] sum;
+    wire       cout;
+
+    // Instantiate the behavioral 3-bit adder
+    full_adder_3bit_beh uut (
+        .a   (a),
+        .b   (b),
+        .cin (cin),
+        .sum (sum),
+        .cout(cout)
+    );
+
+    // Expected result wire — independent reference calculation
+    wire [3:0] expected;
+    assign expected = a + b + cin;
+
+    // Tracks total tests and failures
+    integer pass_count;
+    integer fail_count;
+    integer i, j;
+
+    // Task: print one result row and update counters
+    task show_result;
+        begin
+            if ({cout, sum} == expected) begin
+                pass_count = pass_count + 1;
+                $display("  %b(%0d) + %b(%0d) + %b = %b|%b = %0d  | PASS",
+                          a, a, b, b, cin, cout, sum,
+                          {cout, sum});
+            end
+            else begin
+                fail_count = fail_count + 1;
+                $display("  %b(%0d) + %b(%0d) + %b = %b|%b = %0d  | FAIL (expected %0d)",
+                          a, a, b, b, cin, cout, sum,
+                          {cout, sum}, expected);
+            end
+        end
+    endtask
+
+    initial begin
+        // Initialise counters
+        pass_count = 0;
+        fail_count = 0;
+
+        $display("====================================================");
+        $display("     3-Bit Full Adder — Behavioral Modeling         ");
+        $display("====================================================");
+        $display("  A(d)  +  B(d)  + Cin = Cout|Sum = Dec | Result   ");
+        $display("----------------------------------------------------");
+
+        // Exhaustive test — all 8 x 8 x 2 = 128 combinations
+        for (i = 0; i < 8; i = i + 1) begin
+            for (j = 0; j < 8; j = j + 1) begin
+
+                a = i; b = j; cin = 0; #10;
+                show_result;
+
+                a = i; b = j; cin = 1; #10;
+                show_result;
+
+            end
+        end
+
+        // Summary report
+        $display("====================================================");
+        $display("  Total tests : %0d", pass_count + fail_count);
+        $display("  PASSED      : %0d", pass_count);
+        $display("  FAILED      : %0d", fail_count);
+        $display("====================================================");
+
+        $finish;
+    end
 
 endmodule
