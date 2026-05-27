@@ -1,33 +1,97 @@
+`timescale 1ns / 1ps
+
 module tb_rca_4bit_behavioral;
 
-  reg  [3:0] a, b;
-  reg  cin;
-  wire [3:0] sum;
-  wire cout;
+    // --------------------------
+    // Declare testbench signals
+    // --------------------------
+    reg  [3:0] a;       // drives input a of DUT
+    reg  [3:0] b;       // drives input b of DUT
+    reg        cin;     // drives carry-in of DUT
 
-  rca_4bit_behavioral uut (
-    .a(a),
-    .b(b),
-    .cin(cin),
-    .sum(sum),
-    .cout(cout)
-  );
+    wire [3:0] sum;     // receives sum output from DUT
+    wire       cout;    // receives carry-out from DUT
 
-  initial begin
-    $dumpfile("output.vcd");
-    $dumpvars;
-  end
+    // --------------------------
+    // Connect testbench to DUT
+    // --------------------------
+    rca_4bit_behavioral DUT (
+        .a(a),
+        .b(b),
+        .cin(cin),
+        .sum(sum),
+        .cout(cout)
+    );
 
-  initial begin
-    a = 4'b0000; b = 4'b0000; cin = 0; #10;  // 0+0     = 0
-    a = 4'b0001; b = 4'b0001; cin = 0; #10;  // 1+1     = 2
-    a = 4'b0011; b = 4'b0010; cin = 0; #10;  // 3+2     = 5
-    a = 4'b0101; b = 4'b0011; cin = 1; #10;  // 5+3+1   = 9
-    a = 4'b1010; b = 4'b0101; cin = 0; #10;  // 10+5    = 15
-    a = 4'b1111; b = 4'b0001; cin = 0; #10;  // 15+1    = 16 (cout=1)
-    a = 4'b1111; b = 4'b1111; cin = 1; #10;  // 15+15+1 = 31 (cout=1)
-    a = 4'b1100; b = 4'b0011; cin = 0; #10;  // 12+3    = 15
-    $finish;
-  end
+    // --------------------------
+    // EPWave waveform dump
+    // --------------------------
+    initial begin
+        $dumpfile("dump.vcd");
+        $dumpvars(0, tb_rca_4bit_behavioral);
+    end
+
+    // --------------------------
+    // Apply test inputs
+    // --------------------------
+    initial begin
+
+        $display("-----------------------------------------------");
+        $display("   4-bit RCA Behavioral Model — Test Results   ");
+        $display("-----------------------------------------------");
+        $display("  A  |  B  | Cin | Sum | Cout |   Decimal      ");
+        $display("-----|-----|-----|-----|------|----------------");
+
+        // Test 1 : 0 + 0 + 0 = 0
+        a = 4'd0;  b = 4'd0;  cin = 1'b0; #10;
+        $display("  %0d  |  %0d  |  %0d  |  %0d  |  %0d   | %0d + %0d = %0d",
+                  a, b, cin, sum, cout, a, b, {cout,sum});
+
+        // Test 2 : 2 + 3 = 5
+        a = 4'd2;  b = 4'd3;  cin = 1'b0; #10;
+        $display("  %0d  |  %0d  |  %0d  |  %0d  |  %0d   | %0d + %0d = %0d",
+                  a, b, cin, sum, cout, a, b, {cout,sum});
+
+        // Test 3 : 3 + 4 = 7
+        a = 4'd3;  b = 4'd4;  cin = 1'b0; #10;
+        $display("  %0d  |  %0d  |  %0d  |  %0d  |  %0d   | %0d + %0d = %0d",
+                  a, b, cin, sum, cout, a, b, {cout,sum});
+
+        // Test 4 : 7 + 8 = 15
+        a = 4'd7;  b = 4'd8;  cin = 1'b0; #10;
+        $display("  %0d  |  %0d  |  %0d  | %0d  |  %0d   | %0d + %0d = %0d",
+                  a, b, cin, sum, cout, a, b, {cout,sum});
+
+        // Test 5 : 9 + 6 = 15
+        a = 4'd9;  b = 4'd6;  cin = 1'b0; #10;
+        $display("  %0d  |  %0d  |  %0d  | %0d  |  %0d   | %0d + %0d = %0d",
+                  a, b, cin, sum, cout, a, b, {cout,sum});
+
+        // Test 6 : 5 + 5 + cin(1) = 11
+        a = 4'd5;  b = 4'd5;  cin = 1'b1; #10;
+        $display("  %0d  |  %0d  |  %0d  | %0d  |  %0d   | %0d + %0d + cin = %0d",
+                  a, b, cin, sum, cout, a, b, {cout,sum});
+
+        // Test 7 : 15 + 1 = 16 → overflow
+        a = 4'd15; b = 4'd1;  cin = 1'b0; #10;
+        $display(" %0d  |  %0d  |  %0d  |  %0d  |  %0d   | %0d + %0d = %0d (overflow)",
+                  a, b, cin, sum, cout, a, b, {cout,sum});
+
+        // Test 8 : 15 + 15 = 30 → overflow
+        a = 4'd15; b = 4'd15; cin = 1'b0; #10;
+        $display(" %0d  | %0d  |  %0d  | %0d  |  %0d   | %0d + %0d = %0d (overflow)",
+                  a, b, cin, sum, cout, a, b, {cout,sum});
+
+        // Test 9 : 15 + 15 + cin(1) = 31 → max possible value
+        a = 4'd15; b = 4'd15; cin = 1'b1; #10;
+        $display(" %0d  | %0d  |  %0d  | %0d  |  %0d   | %0d + %0d + cin = %0d (max)",
+                  a, b, cin, sum, cout, a, b, {cout,sum});
+
+        $display("-----------------------------------------------");
+        $display("          Simulation Complete                  ");
+        $display("-----------------------------------------------");
+
+        $finish;
+    end
 
 endmodule
