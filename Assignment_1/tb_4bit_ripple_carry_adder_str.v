@@ -1,41 +1,55 @@
-`timescale 1ns/1ps
 
-module tb_rca_4bit;
+`timescale 1ns / 1ps
 
-    reg  [3:0] a, b;
+module tb_ripple_carry_adder;
+
+    // Inputs to DUT (reg because driven by testbench)
+    reg  [3:0] a;
+    reg  [3:0] b;
     reg        cin;
+
+    // Outputs from DUT (wire because driven by design)
     wire [3:0] sum;
     wire       cout;
 
-    // Use the correct module name from design
-    rca_4bit_structural uut (
-        .a(a), .b(b), .cin(cin),
-        .sum(sum), .cout(cout)
+    // Instantiate the Design Under Test
+    ripple_carry_adder_4bit DUT (
+        .a(a),
+        .b(b),
+        .cin(cin),
+        .sum(sum),
+        .cout(cout)
     );
 
     initial begin
-        $display("=====================================");
-        $display("  4-bit Ripple Carry Adder — Test    ");
-        $display("=====================================");
-        $display("  A  |  B  |Cin| Sum |Cout| Dec");
-        $display("-----|-----|---|-----|-----|----");
+        // Print table header
+        $display("  A    |  B    | Cin | Sum   | Cout");
+        $display("-------|-------|-----|-------|-----");
 
-        a = 0;  b = 0;  cin = 0; #10;
-        $display("  %b | %b |  %b | %b |  %b  | %0d+%0d=%0d", a,b,cin,sum,cout,a,b,{cout,sum});
+        // Test 1: 0 + 0 = 0
+        a = 4'b0000; b = 4'b0000; cin = 0; #10;
+        $display(" %b |  %b |  %b  | %b |  %b", a, b, cin, sum, cout);
 
-        a = 1;  b = 1;  cin = 0; #10;
-        $display("  %b | %b |  %b | %b |  %b  | %0d+%0d=%0d", a,b,cin,sum,cout,a,b,{cout,sum});
+        // Test 2: 3 + 4 = 7
+        a = 4'b0011; b = 4'b0100; cin = 0; #10;
+        $display(" %b |  %b |  %b  | %b |  %b", a, b, cin, sum, cout);
 
-        a = 5;  b = 3;  cin = 0; #10;
-        $display("  %b | %b |  %b | %b |  %b  | %0d+%0d=%0d", a,b,cin,sum,cout,a,b,{cout,sum});
+        // Test 3: 7 + 8 = 15
+        a = 4'b0111; b = 4'b1000; cin = 0; #10;
+        $display(" %b |  %b |  %b  | %b |  %b", a, b, cin, sum, cout);
 
-        a = 7;  b = 8;  cin = 0; #10;
-        $display("  %b | %b |  %b | %b |  %b  | %0d+%0d=%0d", a,b,cin,sum,cout,a,b,{cout,sum});
+        // Test 4: 15 + 1 = 16 → overflow (sum=0000, cout=1)
+        a = 4'b1111; b = 4'b0001; cin = 0; #10;
+        $display(" %b |  %b |  %b  | %b |  %b", a, b, cin, sum, cout);
 
-        a = 15; b = 15; cin = 1; #10;
-        $display("  %b | %b |  %b | %b |  %b  | %0d+%0d=%0d", a,b,cin,sum,cout,a,b,{cout,sum});
+        // Test 5: 5 + 5 + cin=1 = 11
+        a = 4'b0101; b = 4'b0101; cin = 1; #10;
+        $display(" %b |  %b |  %b  | %b |  %b", a, b, cin, sum, cout);
 
-        $display("=====================================");
+        // Test 6: 15 + 15 = 30 → sum=1110, cout=1
+        a = 4'b1111; b = 4'b1111; cin = 0; #10;
+        $display(" %b |  %b |  %b  | %b |  %b", a, b, cin, sum, cout);
+
         $finish;
     end
 
